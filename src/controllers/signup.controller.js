@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const UserSchema = require("../models/user.model");
-const { errorResponse } = require("../utils/errorResponse.utils");
+const { errorResponse, serverError } = require("../utils/errorResponse.utils");
 
 const registerNewUser = async (req, res) => {
     try {
@@ -38,10 +38,10 @@ const registerNewUser = async (req, res) => {
 
         const token = jwt.sign(payload, JWT_SECRET, {expiresIn},);
 
-        res.status(201).json({error: false, message: "User Registered Successfully!", token});
+        return res.status(201).json({error: false, message: "User Registered Successfully!", token});
     } catch (error) {
         console.log(error);
-        res.status(500).json({error: true, message: "Internal Server Error!"});
+        return serverError(res);
     }
 };
 
@@ -60,7 +60,7 @@ const isUsernameRegistered = async(req, res) => {
         
     } catch (error) {
         console.log(error);
-        res.status(500).json({error: true, message: "Internal Server Error!"})
+        return serverError(res);
     }
 }
 

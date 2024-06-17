@@ -106,4 +106,44 @@ const generateLoginOtp = async (req, res) => {
     }
 } 
 
-module.exports = { userLogin, generateLoginOtp};
+const loginWithOtp = async (req, res) => {
+    try {
+        const { email, username, otp } = req.body;
+
+        if(!otp) return errorResponse(res, "Otp is required!");
+        if(!email && !username) return errorResponse(res, "Email or Username is required!");
+
+        const user = await UserSchema.findOne({
+            $or : [
+                {username: username},
+                {email: email}
+            ]
+        }).select("+otp");
+
+        if(!user) return errorResponse(res, "User not found", 404);
+
+        const currentTime = new Date();
+        
+        const isValidOtp = await bcrypt.compare(otp, user.otp);
+        
+        if(!isValidOtp) return errorResponse(res, "Invalid OTP!");
+
+        const otpValidityDuration = 5 * 60 * 1000; 
+
+        if(!user.otpCreatedAt || (currentTime - new Date(user.otpCreatedAt)) > otpValidityDuration) return errorResponse(res, "OTP has expired!", 401);
+
+        const payload = {userId: user._id};
+        const JWT_SECRET = process.env.JWT_SECRET;
+        const expiresIn = '2d';
+
+        const token = jwt.sign(payload, JWT_SECRET, {expiresIn});
+
+        return res.status(200).json({error: false, message: "Login successful!", token});
+
+    } catch (error) {
+        console.log(error);
+        return serverError(res);
+    }
+}
+
+module.exports = { userLogin, generateLoginOtp, loginWithOtp};
