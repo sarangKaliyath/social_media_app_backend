@@ -1,17 +1,35 @@
 const mongoose = require("mongoose");
 
+global.mongoose = {
+    conn: null,
+    promise: null,
+}
+
 
 const dbConnect = async() => {
     try {
-        const MONGO_URI = process.env.MONGO_URI;
 
-        await mongoose.connect(MONGO_URI, {autoIndex: true});
+        if(global.mongoose.conn){
+            console.log("************************ Existing DB Connection ************************");
+            return global.mongoose.conn;
+        }
+        else {
+            console.log("************************ New DB Connection ************************");
 
-        console.log("************************ Database connection acquired ************************")
+            const MONGO_URI = process.env.MONGO_URI;
+
+            const newConnPromise = await mongoose.connect(MONGO_URI, {autoIndex: true});
+
+            global.mongoose = {
+                conn: newConnPromise,
+                promise: newConnPromise,
+            }
+
+            return newConnPromise;
+        }
+
     } catch (error) {
-        console.log("************************ Database connection failed ************************");
         console.log(error);
-        process.exit(1);
     }
 }
 
