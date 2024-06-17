@@ -1,10 +1,11 @@
 const express = require("express");
-const dbConnect = require("./config/dbConnect");
 const app = express();
+const SignupRouter = require("./routes/user.routes");
 
-dbConnect();
 
 app.use(express.json());
+
+app.use("/api/signup", SignupRouter)
 
 
 module.exports = app;
