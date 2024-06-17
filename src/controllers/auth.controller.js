@@ -121,6 +121,7 @@ const loginWithOtp = async (req, res) => {
         }).select("+otp");
 
         if(!user) return errorResponse(res, "User not found", 404);
+        if(!user.otp) return errorResponse(res, "Please regenerate OTP!");
 
         const currentTime = new Date();
         
@@ -131,6 +132,11 @@ const loginWithOtp = async (req, res) => {
         const otpValidityDuration = 5 * 60 * 1000; 
 
         if(!user.otpCreatedAt || (currentTime - new Date(user.otpCreatedAt)) > otpValidityDuration) return errorResponse(res, "OTP has expired!", 401);
+
+        user.otp = null,
+        user.otpCreatedAt = null,
+
+        await user.save();
 
         const payload = {userId: user._id};
         const JWT_SECRET = process.env.JWT_SECRET;
