@@ -17,13 +17,14 @@ const UserSchema = new Schema({
 
     password: {
         type: String,
-        unique: true,
         required: true,
         trim: true,
+        select: false,
     },
 
     otp: {
         type: String,
+        select: false
     },
 
     otpCreatedAt: {

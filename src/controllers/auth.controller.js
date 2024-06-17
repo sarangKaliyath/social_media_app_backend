@@ -1,8 +1,9 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer")
 const UserSchema = require("../models/user.model");
-const { serverError, errorResponse } = require("../utils/errorResponse");
-
+const { serverError, errorResponse } = require("../utils/errorResponse.utils");
+const { generateOtp } = require("../utils/otp.utils");
 
 const userLogin = async (req, res) => {
     try {
@@ -41,4 +42,68 @@ const userLogin = async (req, res) => {
     }
 }
 
-module.exports = {userLogin};
+const generateLoginOtp = async (req, res) => {
+    try {
+        
+        const {email, username} = req.body;
+
+        if(!email && !username) return errorResponse(res, "Email or Username is required!");
+        
+        const user = await UserSchema.findOne({
+            $or: [
+                {username: username},
+                {email: email},
+            ]
+        });
+
+        if(!user) return errorResponse(res, "User Not found!", 404);
+
+        const otp = generateOtp(6);
+
+        const hashedOtp = await bcrypt.hash(otp, 6);
+        
+        user.otp = hashedOtp;
+        user.otpCreatedAt = new Date();
+
+        await user.save();
+
+        let mailTransporter =
+        nodemailer.createTransport(
+            {
+                host: 'smtp.fastmail.com',
+                port: 465,
+                secure: true,
+                auth: {
+                    user: process.env.FAST_MAIL_EMAIL,
+                    pass: process.env.FAST_MAIL_PASSWORD,
+                }
+            }
+        );
+
+        let mailDetails = {
+            from: process.env.FAST_MAIL_EMAIL,
+            to: user.email,
+            subject: 'OTP FOR MAIL LOGIN',
+            text: `OTP for login: ${otp}`
+        };
+
+        mailTransporter
+        .sendMail(mailDetails,
+            function (error, data) {
+                if (error) {
+                    console.log("nodemailer error: ", error);
+                    return errorResponse(res, error.message);
+                } else {
+                    console.log('Email sent successfully');
+                    return res.status(200).json({error: false, message: "Otp send to registered Email."})
+                }
+            }
+        );
+
+    } catch (error) {
+        console.log(error);
+        return serverError(res);
+    }
+} 
+
+module.exports = { userLogin, generateLoginOtp};
