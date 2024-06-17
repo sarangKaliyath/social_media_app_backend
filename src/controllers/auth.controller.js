@@ -121,13 +121,13 @@ const loginWithOtp = async (req, res) => {
         }).select("+otp");
 
         if(!user) return errorResponse(res, "User not found", 404);
-        if(!user.otp) return errorResponse(res, "Please regenerate OTP!");
+        if(!user.otp) return errorResponse(res, "Please regenerate OTP!", 400, {regenerateOtp: true});
 
         const currentTime = new Date();
         
         const isValidOtp = await bcrypt.compare(otp, user.otp);
         
-        if(!isValidOtp) return errorResponse(res, "Invalid OTP!");
+        if(!isValidOtp) return errorResponse(res, "Invalid OTP!", 401, {invalidOtp: true});
 
         const otpValidityDuration = 5 * 60 * 1000; 
 
