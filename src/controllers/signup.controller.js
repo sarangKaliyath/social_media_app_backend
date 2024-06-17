@@ -45,6 +45,21 @@ const registerNewUser = async (req, res) => {
     }
 };
 
+const isUsernameRegistered = async(req, res) => {
+    try {
 
+        const {username} = req.body;
 
-module.exports = {registerNewUser};
+        const user = await UserSchema.findOne({username});
+
+        if(user) return errorResponse(res, "Username already taken!");
+
+        return res.status(200).json({error: false, message: "Username available"});
+        
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({error: true, message: "Internal Server Error!"})
+    }
+}
+
+module.exports = {registerNewUser, isUsernameRegistered};
