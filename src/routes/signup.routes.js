@@ -3,6 +3,6 @@ const {registerNewUser, isUsernameRegistered} = require("../controllers/signup.c
 
 
 router.post("/new-user", registerNewUser);
-router.post("/username", isUsernameRegistered);
+router.get("/:username", isUsernameRegistered);
 
 module.exports = router;

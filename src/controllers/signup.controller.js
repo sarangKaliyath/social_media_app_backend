@@ -48,9 +48,11 @@ const registerNewUser = async (req, res) => {
 const isUsernameRegistered = async(req, res) => {
     try {
 
-        const {username} = req.body;
+        const {username} = req.params;
 
         const user = await UserSchema.findOne({username});
+
+        console.log({user, username});
 
         if(user) return errorResponse(res, "Username already taken!");
 
