@@ -1,5 +1,5 @@
-const errorResponse = (res, message, statusCode) => {
-    return res.status(statusCode || 400).json({message, error: true});
+const errorResponse = (res, message, statusCode, keys = {}) => {
+    return res.status(statusCode || 400).json({message, error: true, ...keys});
 }
 
 const serverError = (res) => {
