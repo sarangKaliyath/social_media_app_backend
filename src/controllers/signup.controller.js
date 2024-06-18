@@ -52,8 +52,6 @@ const isUsernameRegistered = async(req, res) => {
 
         const user = await UserSchema.findOne({username});
 
-        console.log({user, username});
-
         if(user) return errorResponse(res, "Username already taken!");
 
         return res.status(200).json({error: false, message: "Username available"});
