@@ -23,7 +23,7 @@ const registerNewUser = async (req, res) => {
         if(user) return errorResponse(res, "Username already taken!");
 
         const hashedPassword = await bcrypt.hash(password, 6);
-        console.log({gender})
+
         const picUrlToSave = gender === "female" ? profilePicFemale : profilePicMale;
 
         user = new UserSchema({
