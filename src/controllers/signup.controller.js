@@ -2,10 +2,12 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const UserSchema = require("../models/user.model");
 const { errorResponse, serverError } = require("../utils/errorResponse.utils");
+const profilePicFemale = 'https://res.cloudinary.com/dnc3g9s6f/image/upload/v1718890934/l5nw5p87uie3xyr60hcf.jpg';
+const profilePicMale = 'https://res.cloudinary.com/dnc3g9s6f/image/upload/v1718890814/zjvfntcm4ek9n1adub9w.webp';
 
 const registerNewUser = async (req, res) => {
     try {
-        const {name, email, password, username, profilePic} = req.body;
+        const {name, email, password, username, profilePic, gender} = req.body;
 
         if(!name) return errorResponse(res, "Name is required!");
         if(!email) return errorResponse(res, "Email is required!");
@@ -21,13 +23,15 @@ const registerNewUser = async (req, res) => {
         if(user) return errorResponse(res, "Username already taken!");
 
         const hashedPassword = await bcrypt.hash(password, 6);
+        console.log({gender})
+        const picUrlToSave = gender === "female" ? profilePicFemale : profilePicMale;
 
         user = new UserSchema({
             name,
             email,
             password: hashedPassword,
             username: username,
-            profilePic: profilePic || null, 
+            profilePic: profilePic || picUrlToSave, 
         })
 
         await user.save();
