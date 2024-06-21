@@ -152,4 +152,27 @@ const loginWithOtp = async (req, res) => {
     }
 }
 
-module.exports = { userLogin, generateLoginOtp, loginWithOtp};
+const validateToken = async (req, res) => {
+    try {
+        const {token} = req.body;
+
+        if(!token) return errorResponse(res, "Token is required");
+
+        const JWT_SECRET = process.env.JWT_SECRET;
+
+        jwt.verify(token, JWT_SECRET, (err, decoded) => {
+
+            if(err) return errorResponse(res, err.message, 401, {isExpired: true})
+    
+            return res.status(200).json({error: false, isAuthorized: true, tokenExpired: false, userId: decoded?.userId});
+            
+        });
+
+
+    } catch (error) {
+        console.log(error);
+        return serverError(res);
+    }
+}
+
+module.exports = { userLogin, generateLoginOtp, loginWithOtp, validateToken};
