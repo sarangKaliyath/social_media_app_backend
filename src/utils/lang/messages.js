@@ -2,7 +2,7 @@ module.exports = {
   response: {
     CAG001: {
       code: '200',
-      message: 'Health check successful',
+      message: 'Success',
     },
     CAGE002: {
       code: '400',

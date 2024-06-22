@@ -7,16 +7,6 @@
   },
   "host": "localhost:8000",
   "basePath": "/",
-  "tags": [
-    {
-      "name": "Signup Apis",
-      "description": "Apis for registration of new user."
-    },
-    {
-      "name": "Login Apis",
-      "description": "Apis for logging in an existing user."
-    }
-  ],
   "schemes": [
     "http"
   ],
@@ -198,7 +188,7 @@
     }
   },
   "definitions": {
-    "helathResponse": {
+    "successResponse": {
       "type": "object",
       "properties": {
         "code": {
@@ -207,7 +197,7 @@
         },
         "message": {
           "type": "string",
-          "example": "Health check successful"
+          "example": "Success"
         }
       }
     },
