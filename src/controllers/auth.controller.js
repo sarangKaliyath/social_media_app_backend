@@ -92,10 +92,10 @@ const generateLoginOtp = async (req, res) => {
             function (error, data) {
                 if (error) {
                     console.log("nodemailer error: ", error);
-                    return errorResponse(res, error.message);
+                    return errorResponse(res, error.message, {otpSent: false});
                 } else {
                     console.log('Email sent successfully');
-                    return res.status(200).json({error: false, message: "Otp send to registered Email."})
+                    return res.status(200).json({error: false, message: "Otp send to registered Email.", otpSent: true, userEmail: user.email});
                 }
             }
         );
