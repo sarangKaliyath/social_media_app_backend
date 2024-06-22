@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const UserSchema = require("../models/user.model");
 const { errorResponse, serverError } = require("../utils/errorResponse.utils");
+const { validateString } = require("../utils/validations.utils");
 const profilePicFemale = 'https://res.cloudinary.com/dnc3g9s6f/image/upload/v1718890934/l5nw5p87uie3xyr60hcf.jpg';
 const profilePicMale = 'https://res.cloudinary.com/dnc3g9s6f/image/upload/v1718890814/zjvfntcm4ek9n1adub9w.webp';
 
@@ -11,6 +12,11 @@ const registerNewUser = async (req, res) => {
 
         if(!name) return errorResponse(res, "Name is required!");
         if(!email) return errorResponse(res, "Email is required!");
+        if(!username) return errorResponse(res, "UserName is required");
+
+        if(!validateString(username)){
+            return errorResponse(res, "Username must only contain Letters and Numbers!", 400, {invalidUserName: true});
+        }
 
         if(password?.length < 6) return errorResponse( res, "Password must be at least 6 characters long!");
 
@@ -53,6 +59,10 @@ const isUsernameRegistered = async(req, res) => {
     try {
 
         const {username} = req.params;
+
+        if(!validateString(username)){
+            return errorResponse(res, "Username must only contain Letters and Numbers!", 400, {invalidUserName: true});
+        }
 
         const user = await UserSchema.findOne({username});
 
