@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer")
 const UserSchema = require("../models/user.model");
 const { serverError, errorResponse } = require("../utils/errorResponse.utils");
-const { generateOtp } = require("../utils/otp.utils");
+const { generateOtp, sendOtpToUserEmail } = require("../utils/otp.utils");
 
 const userLogin = async (req, res) => {
     try {
@@ -67,38 +67,7 @@ const generateLoginOtp = async (req, res) => {
 
         await user.save();
 
-        let mailTransporter =
-        nodemailer.createTransport(
-            {
-                host: 'smtp.fastmail.com',
-                port: 465,
-                secure: true,
-                auth: {
-                    user: process.env.FAST_MAIL_EMAIL,
-                    pass: process.env.FAST_MAIL_PASSWORD,
-                }
-            }
-        );
-
-        let mailDetails = {
-            from: process.env.FAST_MAIL_EMAIL,
-            to: user.email,
-            subject: 'OTP FOR MAIL LOGIN',
-            text: `OTP for login: ${otp}`
-        };
-
-        mailTransporter
-        .sendMail(mailDetails,
-            function (error, data) {
-                if (error) {
-                    console.log("nodemailer error: ", error);
-                    return errorResponse(res, error.message, {otpSent: false});
-                } else {
-                    console.log('Email sent successfully');
-                    return res.status(200).json({error: false, message: "Otp send to registered Email.", otpSent: true, userEmail: user.email});
-                }
-            }
-        );
+        sendOtpToUserEmail({res, user, otp});
 
     } catch (error) {
         console.log(error);
@@ -173,6 +142,55 @@ const validateToken = async (req, res) => {
         console.log(error);
         return serverError(res);
     }
+};
+
+const resetUserPassword = async (req, res) => {
+    try {
+        const {email, username, newPassword, otp} = req.body;
+        
+        if(!newPassword) return errorResponse(res, "New Password is required!");
+        if(!otp) return errorResponse(res, "Opt is required to reset password!");
+        if(!email && !username) return errorResponse(res, "Email or Username is required!");
+        if(newPassword.length < 6) return errorResponse(res, "Password must be at least 6 charters long!");
+
+        const user = await UserSchema.findOne({
+            $or : [
+                {username: username},
+                {email: email},
+            ]
+        }).select("+otp").select("+password");
+
+        if(!user) return errorResponse(res, "User not found!");
+
+        const isNewPasswordSameAsOld = await bcrypt.compare(newPassword, user.password);
+
+        if(isNewPasswordSameAsOld) return errorResponse(res, "New Password cannot be the same as the old password");
+
+        const currentTime = new Date();
+
+        const otpValidityDuration = 5 * 60 * 1000; 
+
+        if(!user.otpCreatedAt || (currentTime - new Date(user.otpCreatedAt)) > otpValidityDuration) return errorResponse(res, "OTP has expired!", 401);
+
+        const isValidOtp = bcrypt.compare(otp, user.otp);
+
+        if(!isValidOtp) return errorResponse(res, "Invalid Otp, please regenerate otp!", 401, {invalidOtp: true});
+
+        user.otp = null;
+        user.otpCreatedAt = null;
+
+        const hashedPassword = await bcrypt.hash(newPassword, 6);
+
+        user.password = hashedPassword;
+
+        const savedUser = await user.save();
+
+        return res.status(200).json({error: false, message: "Password reset successful", passwordReset : true});
+
+    } catch (error) {
+        console.log(error);
+        return serverError(res)
+    }
 }
 
-module.exports = { userLogin, generateLoginOtp, loginWithOtp, validateToken};
+module.exports = { userLogin, generateLoginOtp, loginWithOtp, validateToken, resetUserPassword};
