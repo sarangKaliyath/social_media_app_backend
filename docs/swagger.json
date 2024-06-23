@@ -75,7 +75,7 @@
         }
       }
     },
-    "/api/auth/reg": {
+    "/api/auth/login": {
       "post": {
         "description": "",
         "parameters": [
@@ -126,8 +126,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "default": {
+            "description": ""
           }
         }
       }
@@ -173,6 +173,39 @@
               "type": "object",
               "properties": {
                 "token": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/auth/reset-password": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "example": "any"
+                },
+                "username": {
+                  "example": "any"
+                },
+                "newPassword": {
+                  "example": "any"
+                },
+                "otp": {
                   "example": "any"
                 }
               }
