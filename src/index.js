@@ -5,6 +5,7 @@ const cors = require('cors');
 const app = express();
 const SignupRouter = require("./routes/signup.routes");
 const AuthRouter = require("./routes/auth.routes");
+const SearchRouter = require("./routes/search.routes");
 
 app.use(cors());
 app.use(express.json());
@@ -15,7 +16,9 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use("/api/signup", SignupRouter);
 
-app.use("/api/auth", AuthRouter)
+app.use("/api/auth", AuthRouter);
+
+app.use("/api/search", SearchRouter);
 
 
 module.exports = app;
