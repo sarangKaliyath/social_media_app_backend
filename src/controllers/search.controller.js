@@ -30,7 +30,7 @@ const searchUsers = async (req, res) => {
                 }
             
             ))
-        );
+        ) || [];
 
         return res.status(200).json({error: false, message: "Users Found", users: userDataToSend})
     } catch (error) {
