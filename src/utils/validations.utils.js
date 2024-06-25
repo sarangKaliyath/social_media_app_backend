@@ -7,4 +7,9 @@ const validateString = (inputString, regex)  => {
     return regexToTest.test(inputString);
 }
 
-module.exports = {validateString}
+const isExpired = (givenTimeInSeconds) => {
+    const currentTimeInSeconds = Math.floor(Date.now() / 1000);
+    return currentTimeInSeconds > givenTimeInSeconds
+}
+
+module.exports = {validateString, isExpired}
