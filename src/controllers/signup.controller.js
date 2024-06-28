@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const UserSchema = require("../models/user.model");
+const { PendingRequestSchema, AcceptedRequestSchema } = require("../models/friendship.model");
 const { errorResponse, serverError } = require("../utils/errorResponse.utils");
 const { validateString } = require("../utils/validations.utils");
 const { validUsernames } = require("../utils/regex.utils");
@@ -42,6 +43,16 @@ const registerNewUser = async (req, res) => {
         })
 
         await user.save();
+
+        const friendsRequestPayload = {
+            user: user._id,
+            requested: [],
+            received: [],
+        };
+
+        await new PendingRequestSchema(friendsRequestPayload).save();
+
+        await new AcceptedRequestSchema(friendsRequestPayload).save();
         
         const payload = {userId: user._id};
         const JWT_SECRET = process.env.JWT_SECRET;
