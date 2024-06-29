@@ -51,16 +51,19 @@ const UserSchema = new Schema({
     newMessage: {
         type: Boolean,
         default: false,
+        select: false,
     },
 
     unreadMessage: {
         type: Boolean,
         default: false,
+        select: false,
     },
 
     unreadNotification: {
         type: Boolean,
         default: false,
+        select: false,
     },
 
     role: {

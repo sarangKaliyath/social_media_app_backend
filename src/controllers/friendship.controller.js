@@ -55,6 +55,7 @@ const acceptFriendsRequest = async (req, res) => {
         userToAdd.requested = userToAdd.requested.filter((el) => el.user?.toString() !== userIdToAdd);
         await userToAdd.save();
 
+        // updating accepted request DB for both users and adding both to each others friends list;
         const currentUserAcceptedList = await AcceptedRequestSchema.findOne({user: userIdToAdd});
         currentUserAcceptedList.friendsList.unshift({user: userId});
         currentUserAcceptedList.save();
@@ -71,9 +72,31 @@ const acceptFriendsRequest = async (req, res) => {
     }
 }
 
+const getPendingRequestList = async (req, res) => {
+    try {
+        const {userId} = req;
+
+        const user = await PendingRequestSchema.findOne({user: userId})
+        .populate('requested.user')
+        .populate('requested.user');
+
+        if(!user) return errorResponse(res, "User not found");
+
+        return res.status(200).json({error: false, message: "Pending list retrieved!", 
+            friendsRequestSent: user.requested, 
+            friendsRequestReceived: user.received
+        })
+        
+    } catch (error) {
+        console.log(error);
+        return serverError(res);
+    }
+};
+
 
 
 module.exports = {
     sendFriendsRequest,
     acceptFriendsRequest,
+    getPendingRequestList,
 }
