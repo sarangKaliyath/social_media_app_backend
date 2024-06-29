@@ -44,15 +44,20 @@ const registerNewUser = async (req, res) => {
 
         await user.save();
 
-        const friendsRequestPayload = {
-            user: user._id,
-            requested: [],
-            received: [],
-        };
+        await new PendingRequestSchema(
+            {
+                user: user._id,
+                requested: [],
+                received: [],
+            }
+        ).save();
 
-        await new PendingRequestSchema(friendsRequestPayload).save();
-
-        await new AcceptedRequestSchema(friendsRequestPayload).save();
+        await new AcceptedRequestSchema(
+            {
+                user: user._id,
+                friendsList: [],
+            }
+        ).save();
         
         const payload = {userId: user._id};
         const JWT_SECRET = process.env.JWT_SECRET;
