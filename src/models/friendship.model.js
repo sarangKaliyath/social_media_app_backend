@@ -31,15 +31,8 @@ const AcceptedRequestSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "UserSchema",
     },  
-    requested: [
-        {   
-            user: {
-                type: Schema.Types.ObjectId,
-                ref: "UserSchema",
-            }
-        }
-    ],
-    received: [
+
+    friendsList: [
         {
             user: { 
                 type: Schema.Types.ObjectId,
