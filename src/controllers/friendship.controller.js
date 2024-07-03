@@ -40,19 +40,19 @@ const acceptFriendsRequest = async (req, res) => {
         const {userIdToAdd} = req.params;
 
         // this is the user who received and will accept the friends request;
-        const currentUser = await PendingRequestSchema.findOne({user: userId});
+        const currentUser = await PendingRequestSchema.findOne({user: userIdToAdd});
 
         // this is the user who sent the friends request;
-        const userToAdd = await PendingRequestSchema.findOne({user: userIdToAdd});
+        const userToAdd = await PendingRequestSchema.findOne({user: userId});
 
         if(!currentUser || !userToAdd) return errorResponse(res, "User not Found!");
 
         if(currentUser.received.length === 0) return errorResponse(res, "No request received!");
 
-        currentUser.received = currentUser.received.filter((el) => el.user?.toString() !== userIdToAdd);
+        currentUser.received = currentUser.received.filter((el) => el.user?.toString() !== userId);
         await currentUser.save();
 
-        userToAdd.requested = userToAdd.requested.filter((el) => el.user?.toString() !== userId);
+        userToAdd.requested = userToAdd.requested.filter((el) => el.user?.toString() !== userIdToAdd);
         await userToAdd.save();
 
         // updating accepted request DB for both users and adding both to each others friends list;
