@@ -19,7 +19,7 @@ const sendFriendsRequest = async (req, res) => {
         const isRequestAlreadyReceived = user.received.length > 0 && 
             user.received?.filter((el) => el.user.toString() === userToAdd);
             
-        if(isRequestAlreadyReceived) return errorResponse(res, "Request already received", {requestReceived: true});
+        if(isRequestAlreadyReceived) return errorResponse(res, "Request already received", 400, {requestReceived: true});
 
         user.requested.unshift({user : friendToAddId});
         await user.save();
@@ -78,7 +78,7 @@ const getPendingRequestList = async (req, res) => {
 
         const user = await PendingRequestSchema.findOne({user: userId})
         .populate('requested.user')
-        .populate('requested.user');
+        .populate('received.user');
 
         if(!user) return errorResponse(res, "User not found");
 
@@ -93,10 +93,26 @@ const getPendingRequestList = async (req, res) => {
     }
 };
 
+const getFriendsList = async (req, res) => {
+    try {
+
+        const {userId} = req;
+
+        const friendsList = await AcceptedRequestSchema.findOne({user: userId}).populate("friendsList.user");
+
+        res.status(200).json({error: false, message: "List acquired!", friendsList : friendsList || []});
+       
+    } catch (error) {
+        console.log(error);
+        return serverError(res);
+    }
+}
+
 
 
 module.exports = {
     sendFriendsRequest,
     acceptFriendsRequest,
     getPendingRequestList,
+    getFriendsList,
 }
