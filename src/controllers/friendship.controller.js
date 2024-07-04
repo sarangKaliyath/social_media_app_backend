@@ -108,6 +108,35 @@ const getFriendsList = async (req, res) => {
     }
 }
 
+const removeFriend = async (req, res) => {
+    try {
+
+        const {userId} = req;
+        const {userToRemoveId} = req.params;
+        
+        if(!userToRemoveId) return errorResponse(res, "userId of friend to remove required!");
+
+        const loggedInUserFriendsList = await AcceptedRequestSchema.findOne({user: userId});
+        const userToRemoveFriendsList = await AcceptedRequestSchema.findOne({user: userToRemoveId});
+
+        if(!loggedInUserFriendsList || !userToRemoveFriendsList) return errorResponse(res, "User not found");
+
+        if(!loggedInUserFriendsList?.friendsList?.find(friend => friend.user?.toString() === userToRemoveId)) return errorResponse(res, "User not found!");
+
+        loggedInUserFriendsList.friendsList = loggedInUserFriendsList.friendsList?.filter((friend) => friend.user.toString() !== userToRemoveId);
+        await loggedInUserFriendsList.save();
+
+        userToRemoveFriendsList.friendsList = userToRemoveFriendsList.friendsList?.filter((friend) => friend.user.toString() !== userId);
+        await userToRemoveFriendsList.save();
+
+        return res.status(200).json({error: false, message: "User removed from friends list", userRemove: true});
+
+    } catch (error) {
+        console.log(error);
+        return serverError(res);
+    }
+}
+
 
 
 module.exports = {
@@ -115,4 +144,5 @@ module.exports = {
     acceptFriendsRequest,
     getPendingRequestList,
     getFriendsList,
+    removeFriend
 }
