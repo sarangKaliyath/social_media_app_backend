@@ -1,12 +1,10 @@
 const jwt = require("jsonwebtoken");
+const {getAcceptedFriendsList}  = require("../utils/socketHelpers.utils");
 
 const onlineUsers = new Map();
 
 const socketConnection = (io) => {
     io.on("connection", (socket) => {
-
-        console.log("A user is connected");
-
 
         socket.on("userConnected", async (token) => {
             try {
@@ -14,11 +12,10 @@ const socketConnection = (io) => {
                 
                 onlineUsers.set(userId, socket.id);
 
-                console.log({onlineUsers})
-
+                const list = await getAcceptedFriendsList(userId);
                 
                 setInterval( () => {
-                    const connectedUsersList = Array.from(onlineUsers.keys())?.filter(el => el !== userId);
+                    const connectedUsersList = Array.from(onlineUsers.keys())?.filter(el => el !== userId && list.includes(el));
                     socket.emit("onlineUsers", connectedUsersList);
                 }, 10 * 1000);
                 
@@ -33,7 +30,6 @@ const socketConnection = (io) => {
             try {         
                 const {userId} = jwt.verify(token, process.env.JWT_SECRET);
                 onlineUsers.delete(userId);
-                console.log("userDisconnected", userId);
             } catch (error) {
                 console.log("Invalid Token", error);
                 socket.emit("error", "Invalid Token for disconnecting");
