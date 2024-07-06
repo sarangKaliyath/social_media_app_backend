@@ -1,5 +1,5 @@
 
-const config = require('../src/config/could');
+const config = require('../src/config/cloud');
 const swaggerAutogen = require('swagger-autogen')();
 const msg = require('../src/utils/lang/messages');
 

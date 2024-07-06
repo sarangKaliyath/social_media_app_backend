@@ -1,12 +1,24 @@
 const express = require("express");
 const cors = require('cors');
+const { Server } = require("socket.io");
+const http = require("http");
+const { socketConnection }  = require("./services/socket.service");
 
-
-const app = express();
 const SignupRouter = require("./routes/signup.routes");
 const AuthRouter = require("./routes/auth.routes");
 const SearchRouter = require("./routes/search.routes");
 const FriendshipRouter = require("./routes/friendship.route");
+
+const app = express();
+
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+    }
+});
+
+socketConnection(io);
 
 app.use(cors());
 app.use(express.json());
@@ -24,4 +36,4 @@ app.use("/api/search", SearchRouter);
 app.use("/api/request", FriendshipRouter);
 
 
-module.exports = app;
+module.exports = {app, server};
