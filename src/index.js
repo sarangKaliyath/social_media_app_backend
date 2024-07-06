@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require('cors');
 const { Server } = require("socket.io");
 const http = require("http");
-const { socketConnection }  = require("./services/socket.service");
+const { socketConnection }  = require("./services/socket.service/socket.service");
 
 const SignupRouter = require("./routes/signup.routes");
 const AuthRouter = require("./routes/auth.routes");
