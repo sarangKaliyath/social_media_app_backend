@@ -82,9 +82,39 @@ const deleteMyPost = async (req, res) => {
     }
 }
 
+const getPostById = async (req, res) => {
+    try {
+        const {userId} = req;
+        const {postId} = req.params;
+
+        if(!postId) return errorResponse(res, "PostId required!");
+
+        const post = await PostSchema.findById(postId)
+            .populate("user")
+            .populate("comments.user");
+
+        if(!post) return errorResponse(res, "Post not found!");
+
+        const loggedInUserFriends = await AcceptedRequestSchema.findOne({user: userId});
+
+        const notMyPost = userId !== post.user._id.toString();
+        const isNotFriend = !loggedInUserFriends?.friendsList?.some(el => el.user.toString() === post.user._id.toString());
+
+        if(isNotFriend && notMyPost) return errorResponse(res, "Must be a acquaintance to view post.");
+
+        return res.status(200).json({error: false, message: "Post found", post});
+
+        
+    } catch (error) {
+        console.log(error);
+        return serverError(res)
+    }
+}
+
 
 module.exports = {
     createPost,
     getPosts,
     deleteMyPost,
+    getPostById,
 }
