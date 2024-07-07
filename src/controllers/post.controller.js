@@ -57,8 +57,34 @@ const getPosts = async (req, res) => {
     }
 }
 
+const deleteMyPost = async (req, res) => {
+    try {
+
+        const {userId} = req;
+        const {postId} = req.query;
+
+        if(!postId) return errorResponse(res, "PostId required!");
+
+        const post = await PostSchema.findById(postId);
+        const user = await UserSchema.findById(userId);
+
+        if(!post) return errorResponse(res, "Post not found!");
+
+        if(post.user.toString() !== userId && user.role !== "admin") return errorResponse(res, "Unauthorized to delete post!");
+
+        await post.deleteOne();
+
+        return res.status(200).json({error: true, message: "Post Deleted"})
+        
+    } catch (error) {
+        console.log(error);
+        return serverError(res);
+    }
+}
+
 
 module.exports = {
     createPost,
     getPosts,
+    deleteMyPost,
 }
