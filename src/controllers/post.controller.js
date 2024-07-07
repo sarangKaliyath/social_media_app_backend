@@ -100,7 +100,7 @@ const getPostById = async (req, res) => {
         const notMyPost = userId !== post.user._id.toString();
         const isNotFriend = !loggedInUserFriends?.friendsList?.some(el => el.user.toString() === post.user._id.toString());
 
-        if(isNotFriend && notMyPost) return errorResponse(res, "Must be a acquaintance to view post.");
+        if(isNotFriend && notMyPost) return errorResponse(res, "Must be a acquaintance to view post.", 401, {unauthorized: true});
 
         return res.status(200).json({error: false, message: "Post found", post});
 
