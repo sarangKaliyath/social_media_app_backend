@@ -170,6 +170,53 @@ const deleteComment = async (req, res) => {
     }
 }
 
+const postLikeToggle = async (req, res) => {
+    try {
+
+        const {userId} = req;
+        const {postId} = req.params;
+
+        const post = await PostSchema.findById(postId);
+
+        if(!post) return errorResponse(res, "Post not found!");
+
+        const likeIndex = post?.likes?.findIndex((el) => el.user.toString() === userId);
+
+        if(likeIndex === -1){
+            post.likes.unshift({user: userId});
+        }
+        else {
+            post.likes.splice(likeIndex, 1);
+        }
+
+        await post.save();
+
+        return res.status(200).json({error: false, message: `Post ${likeIndex === -1 ? "liked" : "unlike"} successfully`})
+        
+    } catch (error) {
+        console.log(error);
+        return serverError(res);
+    }
+}
+
+const getAllLikes = async (req, res) => {
+    try {
+        
+        const { userId } = req;
+        const { postId } = req.params;
+
+        const post = await PostSchema.findById(postId).populate("likes.user");
+
+        if(!post) return errorResponse(res, "Post not found");
+
+        return res.status(200).json({error: false, message: "Total Likes", likes: post.likes, likesCount: post.likes.length});
+
+    } catch (error) {
+        console.log(error);
+        return serverError(res);
+    }
+}
+
 
 module.exports = {
     createPost,
@@ -178,4 +225,6 @@ module.exports = {
     getPostById,
     addComment,
     deleteComment,
+    postLikeToggle,
+    getAllLikes
 }
