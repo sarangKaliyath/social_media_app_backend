@@ -111,10 +111,39 @@ const getPostById = async (req, res) => {
     }
 }
 
+const addComment = async (req, res) => {
+    try {
+        const {userId} = req;
+        const {postId} = req.params;
+        const {text} = req.body;
+
+        if(text.length < 2) return errorResponse(res, "Comment must be at least 2 characters long!");
+
+        const post = await PostSchema.findById(postId);
+
+        if(!post) return errorResponse(res, "Post not found!");
+
+        const comment = {
+            user: userId,
+            text,
+        }
+
+        post.comments.unshift(comment)
+        await post.save();
+
+        return res.status(201).json({error: false, message: "Comment added"});
+        
+    } catch (error) {
+        console.log(error);
+        return serverError(res);
+    }
+}
+
 
 module.exports = {
     createPost,
     getPosts,
     deleteMyPost,
     getPostById,
+    addComment,
 }
