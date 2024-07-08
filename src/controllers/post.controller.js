@@ -199,6 +199,24 @@ const postLikeToggle = async (req, res) => {
     }
 }
 
+const getAllLikes = async (req, res) => {
+    try {
+        
+        const { userId } = req;
+        const { postId } = req.params;
+
+        const post = await PostSchema.findById(postId).populate("likes.user");
+
+        if(!post) return errorResponse(res, "Post not found");
+
+        return res.status(200).json({error: false, message: "Total Likes", likes: post.likes, likesCount: post.likes.length});
+
+    } catch (error) {
+        console.log(error);
+        return serverError(res);
+    }
+}
+
 
 module.exports = {
     createPost,
@@ -208,4 +226,5 @@ module.exports = {
     addComment,
     deleteComment,
     postLikeToggle,
+    getAllLikes
 }
