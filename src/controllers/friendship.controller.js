@@ -9,6 +9,12 @@ const sendFriendsRequest = async (req, res) => {
         const user = await PendingRequestSchema.findOne({user: userId});
         const userToAdd = await PendingRequestSchema.findOne({user: friendToAddId});
 
+        const acceptedFriendsList = await AcceptedRequestSchema.findOne({user: userId});
+
+        const isAlreadyAccepted = acceptedFriendsList.friendsList.find(el => el.user.toString() === friendToAddId);
+
+        if(isAlreadyAccepted) return errorResponse(res, "User is already a friend!", 400, {alreadyAccepted: true});
+
         if(!user || !userToAdd) return errorResponse(res, "User not found");
 
         const isRequestAlreadySend = user.requested.length > 0 && 
