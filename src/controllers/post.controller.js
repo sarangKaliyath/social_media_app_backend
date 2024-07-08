@@ -139,6 +139,37 @@ const addComment = async (req, res) => {
     }
 }
 
+const deleteComment = async (req, res) => {
+    try {
+        
+        const {userId} = req;
+        const {postId, commentId} = req.params;
+
+        const post = await PostSchema.findById(postId);
+        const user = await UserSchema.findById(userId);
+
+        if(!post) return errorResponse(res, "Post not found!");
+
+        const commentIndex = post.comments.findIndex((el) => el._id.toString() === commentId );
+
+        if(commentIndex === -1) return errorResponse(res, "Comment not found!");
+
+        if(user.role !== 'admin' && post.comments[commentIndex]?.user.toString() !== userId){
+            return errorResponse(res, "Unauthorize to delete comment!", 401);
+        }
+
+        post.comments.splice(commentIndex, 1);
+
+        await post.save();
+
+        return res.status(200).json({error: false, message: "Comment deleted!"});
+
+    } catch (error) {
+        console.log(error);
+        return serverError(res);
+    }
+}
+
 
 module.exports = {
     createPost,
@@ -146,4 +177,5 @@ module.exports = {
     deleteMyPost,
     getPostById,
     addComment,
+    deleteComment,
 }
