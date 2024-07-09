@@ -50,17 +50,17 @@ const acceptFriendsRequest = async (req, res) => {
 
         if (!currentUser || !userToAdd) return errorResponse(res, "User not found!");
 
-        const requestedIndex = currentUser.requested.findIndex(el => el.user.toString() === userIdToAdd);
-        const receivedIndex = userToAdd.received.findIndex(el => el.user.toString() === userId);
+        const receivedIndex = currentUser.received.findIndex(el => el.user.toString() === userIdToAdd);
+        const requestedIndex = userToAdd.requested.findIndex(el => el.user.toString() === userId);
 
         if (receivedIndex === -1 || requestedIndex === -1) {
             return errorResponse(res, "No request received!");
         }
 
-        currentUser.requested.splice(requestedIndex, 1);
+        currentUser.received.splice(receivedIndex, 1);
         await currentUser.save();
 
-        userToAdd.received.splice(receivedIndex, 1);
+        userToAdd.requested.splice(requestedIndex, 1);
         await userToAdd.save();
 
         const currentUserAcceptedList = await AcceptedRequestSchema.findOne({ user: userId });
