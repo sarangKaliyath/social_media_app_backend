@@ -46,28 +46,28 @@ const acceptFriendsRequest = async (req, res) => {
         const {userIdToAdd} = req.params;
 
         // this is the user who received and will accept the friends request;
-        const currentUser = await PendingRequestSchema.findOne({user: userIdToAdd});
+        const currentUser = await PendingRequestSchema.findOne({user: userId});
 
         // this is the user who sent the friends request;
-        const userToAdd = await PendingRequestSchema.findOne({user: userId});
+        const userToAdd = await PendingRequestSchema.findOne({user: userIdToAdd});
 
         if(!currentUser || !userToAdd) return errorResponse(res, "User not Found!");
 
-        if(currentUser.received.length === 0) return errorResponse(res, "No request received!");
+        if(userToAdd.received.length === 0) return errorResponse(res, "No request received!");
 
-        currentUser.received = currentUser.received.filter((el) => el.user?.toString() !== userId);
+        currentUser.requested = currentUser.requested.filter((el) => el.user?.toString() !== userId);
         await currentUser.save();
 
-        userToAdd.requested = userToAdd.requested.filter((el) => el.user?.toString() !== userIdToAdd);
+        userToAdd.received = userToAdd.received.filter((el) => el.user?.toString() !== userIdToAdd);
         await userToAdd.save();
 
         // updating accepted request DB for both users and adding both to each others friends list;
-        const currentUserAcceptedList = await AcceptedRequestSchema.findOne({user: userIdToAdd});
-        currentUserAcceptedList.friendsList.unshift({user: userId});
+        const currentUserAcceptedList = await AcceptedRequestSchema.findOne({user: userId});
+        currentUserAcceptedList.friendsList.unshift({user: userIdToAdd});
         currentUserAcceptedList.save();
 
-        const userToAddAcceptedList = await AcceptedRequestSchema.findOne({user: userId});
-        userToAddAcceptedList.friendsList.unshift({user: userIdToAdd});
+        const userToAddAcceptedList = await AcceptedRequestSchema.findOne({user: userIdToAdd});
+        userToAddAcceptedList.friendsList.unshift({user: userId});
         userToAddAcceptedList.save();
 
 
