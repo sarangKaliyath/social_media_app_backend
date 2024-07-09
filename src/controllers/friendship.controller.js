@@ -42,41 +42,41 @@ const sendFriendsRequest = async (req, res) => {
 
 const acceptFriendsRequest = async (req, res) => {
     try {
-        const {userId} = req;
-        const {userIdToAdd} = req.params;
+        const { userId } = req;
+        const { userIdToAdd } = req.params;
 
-        // this is the user who received and will accept the friends request;
-        const currentUser = await PendingRequestSchema.findOne({user: userId});
+        const currentUser = await PendingRequestSchema.findOne({ user: userId });
+        const userToAdd = await PendingRequestSchema.findOne({ user: userIdToAdd });
 
-        // this is the user who sent the friends request;
-        const userToAdd = await PendingRequestSchema.findOne({user: userIdToAdd});
+        if (!currentUser || !userToAdd) return errorResponse(res, "User not found!");
 
-        if(!currentUser || !userToAdd) return errorResponse(res, "User not Found!");
+        const receivedIndex = currentUser.received.findIndex(el => el.user.toString() === userIdToAdd);
+        const requestedIndex = userToAdd.requested.findIndex(el => el.user.toString() === userId);
 
-        if(userToAdd.received.length === 0) return errorResponse(res, "No request received!");
+        if (receivedIndex === -1 || requestedIndex === -1) {
+            return errorResponse(res, "No request received!");
+        }
 
-        currentUser.requested = currentUser.requested.filter((el) => el.user?.toString() !== userId);
+        currentUser.received.splice(receivedIndex, 1);
         await currentUser.save();
 
-        userToAdd.received = userToAdd.received.filter((el) => el.user?.toString() !== userIdToAdd);
+        userToAdd.requested.splice(requestedIndex, 1);
         await userToAdd.save();
 
-        // updating accepted request DB for both users and adding both to each others friends list;
-        const currentUserAcceptedList = await AcceptedRequestSchema.findOne({user: userId});
-        currentUserAcceptedList.friendsList.unshift({user: userIdToAdd});
-        currentUserAcceptedList.save();
+        const currentUserAcceptedList = await AcceptedRequestSchema.findOne({ user: userId });
+        currentUserAcceptedList.friendsList.unshift({ user: userIdToAdd });
+        await currentUserAcceptedList.save();
 
-        const userToAddAcceptedList = await AcceptedRequestSchema.findOne({user: userIdToAdd});
-        userToAddAcceptedList.friendsList.unshift({user: userId});
-        userToAddAcceptedList.save();
+        const userToAddAcceptedList = await AcceptedRequestSchema.findOne({ user: userIdToAdd });
+        userToAddAcceptedList.friendsList.unshift({ user: userId });
+        await userToAddAcceptedList.save();
 
-
-        return res.status(200).json({error: false, message: "Request accepted!"});
+        return res.status(200).json({ error: false, message: "Request accepted!" });
     } catch (error) {
         console.log(error);
         return serverError(res);
     }
-}
+};
 
 const getPendingRequestList = async (req, res) => {
     try {
