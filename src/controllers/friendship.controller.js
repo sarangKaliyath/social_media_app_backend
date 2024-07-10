@@ -143,6 +143,31 @@ const removeFriend = async (req, res) => {
     }
 }
 
+const rejectRequest = async (req, res) => {
+    try {
+        
+        const {userId} = req;
+        const {userIdToReject} = req.params;
+
+        const reqList = await PendingRequestSchema.findOne({user: userId});
+
+        if(!reqList) return errorResponse(res, "Friends list not found!");
+
+        const userToRemoveIndex = reqList.received.findIndex((el) => el.user.toString() === userIdToReject);
+
+        if(userToRemoveIndex === -1) return errorResponse(res, "Friends request not received for this user!");
+
+        reqList.received.splice(userToRemoveIndex, 1);
+        await reqList.save();
+
+        return res.status(204).json({error: false, message: "Friends request rejected"});
+
+    } catch (error) {
+        console.log(error);
+        return serverError(res);
+    }
+}
+
 
 
 module.exports = {
@@ -150,5 +175,6 @@ module.exports = {
     acceptFriendsRequest,
     getPendingRequestList,
     getFriendsList,
-    removeFriend
+    removeFriend,
+    rejectRequest,
 }
