@@ -363,6 +363,32 @@
         }
       }
     },
+    "/api/request/reject/{userIdToReject}": {
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "userIdToReject",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "402": {
+            "description": "Payment Required"
+          }
+        }
+      }
+    },
     "/api/post/create": {
       "post": {
         "description": "",
