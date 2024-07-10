@@ -149,18 +149,26 @@ const rejectRequest = async (req, res) => {
         const {userId} = req;
         const {userIdToReject} = req.params;
 
-        const reqList = await PendingRequestSchema.findOne({user: userId});
+        const receivedList = await PendingRequestSchema.findOne({user: userId});
+        const requestList = await PendingRequestSchema.findOne({user: userIdToReject});
 
-        if(!reqList) return errorResponse(res, "Friends list not found!");
+        if(!receivedList || !requestList) return errorResponse(res, "Friends list not found!");
 
-        const userToRemoveIndex = reqList.received.findIndex((el) => el.user.toString() === userIdToReject);
+        const userToRemoveIndex = receivedList.received.findIndex((el) => el.user.toString() === userIdToReject);
 
-        if(userToRemoveIndex === -1) return errorResponse(res, "Friends request not received for this user!");
+        if(userToRemoveIndex === -1) return errorResponse(res, "Friends request not received form this user!");
 
-        reqList.received.splice(userToRemoveIndex, 1);
-        await reqList.save();
+        const userRequestedIndex = requestList.requested.findIndex(el => el.user.toString() === userId);
 
-        return res.status(204).json({error: false, message: "Friends request rejected"});
+        if(userRequestedIndex === -1) return errorResponse(res, "Friends req not sent by this user!");
+
+        receivedList.received.splice(userToRemoveIndex, 1);
+        await receivedList.save();
+
+        requestList.requested.splice(userRequestedIndex, 1);
+        await requestList.save();
+
+        return res.status(200).json({error: false, message: "Friends request rejected"});
 
     } catch (error) {
         console.log(error);
