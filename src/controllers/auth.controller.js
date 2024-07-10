@@ -34,7 +34,7 @@ const userLogin = async (req, res) => {
 
         const token = jwt.sign(payload, JWT_SECRET, {expiresIn});
 
-        return res.status(200).json({error: false, message: "Login successful!", token});
+        return res.status(200).json({error: false, message: "Login successful!", token, username: user?.username, profilePic: user?.profilePic});
         
     } catch (error) {
         console.log(error);
@@ -113,7 +113,9 @@ const loginWithOtp = async (req, res) => {
 
         const token = jwt.sign(payload, JWT_SECRET, {expiresIn});
 
-        return res.status(200).json({error: false, message: "Login successful!", token, regenerateOtp: false, invalidOtp: false});
+        return res.status(200).json({error: false, message: "Login successful!", token, regenerateOtp: false, invalidOtp: false, 
+            username: user?.username, profilePic: user?.profilePic
+        });
 
     } catch (error) {
         console.log(error);
