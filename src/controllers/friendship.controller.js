@@ -19,8 +19,7 @@ const sendFriendsRequest = async (req, res) => {
 
         const isRequestAlreadySend = user.requested.length > 0 && 
             user.requested?.filter((el) => el.user.toString() === userToAdd);
-  
-        if(isRequestAlreadySend) return errorResponse(res, "Request already sent", 400, {alreadyRequested: true});
+        if(isRequestAlreadySend.length > 0) return errorResponse(res, "Request already sent", 400, {alreadyRequested: true});
             
         const isRequestAlreadyReceived = user.received.length > 0 && 
             user.received?.filter((el) => el.user.toString() === userToAdd);
@@ -176,6 +175,29 @@ const rejectRequest = async (req, res) => {
     }
 }
 
+const rejectSentRequest = async (req, res) => {
+    try { 
+       const {userId} = req;
+       const {userIdToCancelReq} = req.params;
+       
+       const requestedList = await PendingRequestSchema.findOne({user: userId});
+       
+       if(!requestedList) return errorResponse(res, "Friends list not found!");
+
+       const userToCancelReqIndex = requestedList.requested.findIndex((el) => el.user.toString() === userIdToCancelReq);
+       if(userToCancelReqIndex === -1) return errorResponse(res, 'Friends request not sent to this user!');
+       
+       requestedList.requested.splice(userToCancelReqIndex, 1);
+       await requestedList.save();
+
+       return res.status(200).json({error: false, message : "Cancel Friend request"});
+       
+    } catch (error) {
+        console.log({error});
+        return serverError(res);
+    }
+}
+
 
 
 module.exports = {
@@ -185,4 +207,5 @@ module.exports = {
     getFriendsList,
     removeFriend,
     rejectRequest,
+    rejectSentRequest,
 }

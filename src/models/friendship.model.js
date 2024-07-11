@@ -12,6 +12,10 @@ const PendingRequestSchema = new Schema({
             user: {
                 type: Schema.Types.ObjectId,
                 ref: "UserSchema",
+            },
+            date: {
+                type: Date, 
+                default: Date.now
             }
         }
     ],
@@ -20,6 +24,10 @@ const PendingRequestSchema = new Schema({
             user: { 
                 type: Schema.Types.ObjectId,
                 ref: "UserSchema",
+            },
+            date: {
+                type: Date, 
+                default: Date.now
             }
         }
     ]
