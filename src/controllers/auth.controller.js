@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer")
+const ChatSchema = require("../models/chat.model"); 
 const UserSchema = require("../models/user.model");
 const { serverError, errorResponse } = require("../utils/errorResponse.utils");
 const { generateOtp, sendOtpToUserEmail } = require("../utils/otp.utils");
@@ -33,6 +33,10 @@ const userLogin = async (req, res) => {
         const expiresIn = '2d';
 
         const token = jwt.sign(payload, JWT_SECRET, {expiresIn});
+
+        const userChat = await ChatSchema.findOne({user: user._id});
+
+        if(!userChat) await new ChatSchema({user: user._id, chats: []}).save();
 
         return res.status(200).json({error: false, message: "Login successful!", token, username: user?.username, profilePic: user?.profilePic});
         
@@ -113,6 +117,10 @@ const loginWithOtp = async (req, res) => {
 
         const token = jwt.sign(payload, JWT_SECRET, {expiresIn});
 
+        const userChat = await ChatSchema.findOne({user: user._id});
+
+        if(!userChat) await new ChatSchema({user: user._id, chats: []}).save();
+        
         return res.status(200).json({error: false, message: "Login successful!", token, regenerateOtp: false, invalidOtp: false, 
             username: user?.username, profilePic: user?.profilePic
         });
