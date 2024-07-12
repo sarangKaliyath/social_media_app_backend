@@ -1,5 +1,5 @@
 const {AcceptedRequestSchema} = require("../models/friendship.model");
-
+const onlineUsers = require("../services/socket.service/common.service");
 
 const getAcceptedFriendsList = async (userId) => {
     const list = await AcceptedRequestSchema.findOne({user: userId});
@@ -9,4 +9,12 @@ const getAcceptedFriendsList = async (userId) => {
     return listToSend ? listToSend : [];
 }
 
-module.exports = {getAcceptedFriendsList};
+const findConnectedUser = (userId) => {
+    const user = Array.from(onlineUsers.values())?.find((val) => val.userId === userId);
+    return user;
+}
+
+module.exports = {
+    getAcceptedFriendsList, 
+    findConnectedUser,
+};

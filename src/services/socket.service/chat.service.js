@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const ChatSchema = require("../../models/chat.model");
 const { getUserIdFromToken } = require('../../utils/common.utils');
+const { findConnectedUser } = require('../../utils/socketHelpers.utils');
 
 const loadMessages = async (socket, token, messagesWith) => {
     try {
@@ -21,14 +22,12 @@ const loadMessages = async (socket, token, messagesWith) => {
     }
 }
 
-const sendMessage = async (socket, token, messagesWith, message) => {
+const sendMessage = async (io, socket, token, messagesWith, message) => {
     try {
         const userId = getUserIdFromToken(token);
 
-        // user who will send the messages;
         const senderChat = await ChatSchema.findOne({user: userId});
 
-        // user who will receive the messages;
         const receiverChat = await ChatSchema.findOne({user: messagesWith});
 
         const newMessage = {
@@ -40,7 +39,7 @@ const sendMessage = async (socket, token, messagesWith, message) => {
         const senderPrevMessages = senderChat.chats?.find((msg) => msg.messagesWith.toString() === messagesWith);
 
         if(senderPrevMessages){
-            senderPrevMessages.chats.push(newMessage);
+            senderPrevMessages.messages.push(newMessage);
             await senderChat.save()
         }
         else {
@@ -48,7 +47,6 @@ const sendMessage = async (socket, token, messagesWith, message) => {
                 messagesWith: messagesWith,
                 messages: [newMessage]
             }
-
             senderChat.chats.unshift(firstMessage);
             await senderChat.save();
         }
@@ -56,19 +54,19 @@ const sendMessage = async (socket, token, messagesWith, message) => {
         const receiverPrevMessages = receiverChat.chats?.find((msg) => msg.messagesWith.toString() === userId);
 
         if(receiverPrevMessages){
-            receiverPrevMessages.chats.push(newMessage);
+            receiverPrevMessages.messages.push(newMessage);
             await receiverChat.save();
         }
         else {
             const firstMessage = {
                 messagesWith: userId,
-                message: [newMessage]
+                messages: [newMessage]
             }
             receiverChat.chats.unshift(firstMessage);
             await receiverChat.save();
         }
 
-        return {newMessage: newMessage};
+        io.to(socket.id).emit('newMessageReceived', {newMessage});
 
     } catch (error) {
         console.log(error)
@@ -79,4 +77,5 @@ const sendMessage = async (socket, token, messagesWith, message) => {
 
 module.exports = {
     loadMessages,
+    sendMessage,
 }
