@@ -21,6 +21,60 @@ const loadMessages = async (socket, token, messagesWith) => {
     }
 }
 
+const sendMessage = async (socket, token, messageWith, text) => {
+    console.log({token, messageWith, text})
+    try {
+        const userId = getUserIdFromToken(token);
+
+        const senderChatModel = await ChatSchema.findOne({user: userId});
+
+        const receiverChatModel = await ChatSchema.findOne({user: messageWith});
+
+        const newMessage = {
+            text,
+            sender: userId,
+            receiver: messageWith,
+            date :Date.now(),
+        };
+
+        const senderPreviousChat = senderChatModel.chats.find(el => el.messagesWith.toString() === messageWith);
+        
+        if(senderPreviousChat){
+            senderPreviousChat.messages.push(newMessage);
+            await senderChatModel.save();
+        }
+        else {
+            const newChat = {
+                messagesWith: messageWith,
+                chats: [newMessage]
+            }
+            senderChatModel.chats.unshift(newChat);
+            await senderChatModel.save();
+        }
+
+        const receiverPreviousChat = receiverChatModel.chats.find(el => el.messagesWith.toString() === userId);
+        
+        if(receiverPreviousChat){
+            receiverPreviousChat.messages.push(newMessage);
+            await receiverChatModel.save();
+        }
+        else {
+            const newChat = {
+                messagesWith: userId,
+                chats: [newMessage]
+            }
+            receiverChatModel.chats.unshift(newChat);
+            await receiverChatModel.save();
+        }
+
+        socket.emit("messageSent", {newMessage});
+
+    } catch (error) {
+        console.log({error})
+    }
+}
+
 module.exports = {
-    loadMessages
+    loadMessages,
+    sendMessage,
 }
