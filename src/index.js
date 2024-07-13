@@ -9,6 +9,7 @@ const AuthRouter = require("./routes/auth.routes");
 const SearchRouter = require("./routes/search.routes");
 const FriendshipRouter = require("./routes/friendship.route");
 const PostRouter = require("./routes/post.routes");
+const ChatRouter = require("./routes/chat.routes");
 
 const app = express();
 
@@ -37,5 +38,7 @@ app.use("/api/search", SearchRouter);
 app.use("/api/request", FriendshipRouter);
 
 app.use("/api/post", PostRouter);
+
+app.use("/api/chat", ChatRouter);
 
 module.exports = {app, server};

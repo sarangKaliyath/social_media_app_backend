@@ -245,6 +245,32 @@
         }
       }
     },
+    "/api/search/friends/{username}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "402": {
+            "description": "Payment Required"
+          }
+        }
+      }
+    },
     "/api/request/send/{friendToAddId}": {
       "get": {
         "description": "",
@@ -632,6 +658,26 @@
             "required": true,
             "type": "string"
           },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "402": {
+            "description": "Payment Required"
+          }
+        }
+      }
+    },
+    "/api/chat/all": {
+      "get": {
+        "description": "",
+        "parameters": [
           {
             "name": "authorization",
             "in": "header",

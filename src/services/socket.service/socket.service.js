@@ -1,3 +1,4 @@
+const { loadMessages } = require("./chat.service");
 const { userConnected, userDisconnected, disconnectBySocketId } = require("./userActivity.service");
 
 const socketConnection = (io) => {
@@ -8,6 +9,10 @@ const socketConnection = (io) => {
         socket.on("userDisconnected", async (token) => userDisconnected(socket, token));
 
         socket.on("disconnect", () => disconnectBySocketId(socket));
+
+        // chats 
+
+        socket.on("loadMessages", ({token, messagesWith}) => loadMessages(socket, token, messagesWith))
 
     })
 };
