@@ -380,8 +380,34 @@
           }
         ],
         "responses": {
-          "204": {
-            "description": "No Content"
+          "200": {
+            "description": "OK"
+          },
+          "402": {
+            "description": "Payment Required"
+          }
+        }
+      }
+    },
+    "/api/request/cancel/{userIdToCancelReq}": {
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "userIdToCancelReq",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           },
           "402": {
             "description": "Payment Required"
