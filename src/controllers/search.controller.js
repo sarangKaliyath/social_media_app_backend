@@ -54,9 +54,13 @@ const searchFriends = async (req, res) => {
 
         const regEx = new RegExp(username, "i");
 
-        const matchingFriends = list.friendsList.filter((el) => regEx.test(el.user.username));
-
-        console.log({matchingFriends});
+        const matchingFriends = list.friendsList.filter((el) => regEx.test(el.user.username))
+            .map(el => ({
+                id: el.user._id,
+                email: el.user.email,
+                username: el.user.username,
+                profilePic: el.user.profilePic,
+            }))
 
         return res.status(200).json({error: false, message: "Friends List", searchList: matchingFriends || []});
         
