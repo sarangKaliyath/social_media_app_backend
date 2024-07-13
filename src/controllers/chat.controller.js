@@ -15,7 +15,7 @@ const getAllRecentChats = async (req, res) => {
 
             chatsToSend = user.chats?.map(el => ({
                 messagesWith: el.messagesWith._id,
-                name: el.messagesWith.username,
+                username: el.messagesWith.username,
                 profilePic: el.messagesWith.profilePic,
                 lastMessage: el.messages[el.messages.length - 1].text,
                 date: el.messages[el.messages.length - 1].date,
