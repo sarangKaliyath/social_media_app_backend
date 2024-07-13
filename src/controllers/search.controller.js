@@ -1,3 +1,4 @@
+const { AcceptedRequestSchema } = require("../models/friendship.model");
 const userSchema = require("../models/user.model");
 const { serverError, errorResponse } = require("../utils/errorResponse.utils");
 const { validUsernames } = require("../utils/regex.utils");
@@ -39,4 +40,30 @@ const searchUsers = async (req, res) => {
     }
 }
 
-module.exports = {searchUsers};
+const searchFriends = async (req, res) => {
+    try {
+
+        const {userId} = req;
+        const {username} = req.params;
+
+        if(!username) return errorResponse(res, "Username is required!");
+
+        const list = await AcceptedRequestSchema.findOne({user: userId}).populate("friendsList.user");
+
+        if(!list) return errorResponse(res, "Friends list not found");
+
+        const regEx = new RegExp(username, "i");
+
+        const matchingFriends = list.friendsList.filter((el) => regEx.test(el.user.username));
+
+        console.log({matchingFriends});
+
+        return res.status(200).json({error: false, message: "Friends List", searchList: matchingFriends || []});
+        
+    } catch (error) {
+        console.log(error);
+        return serverError(res);
+    }
+}
+
+module.exports = {searchUsers, searchFriends};
