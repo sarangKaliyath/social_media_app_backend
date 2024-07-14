@@ -1,5 +1,6 @@
 const ChatSchema = require("../models/chat.model");
-const { serverError } = require("../utils/errorResponse.utils");
+const UserSchema = require("../models/user.model");
+const { serverError, errorResponse } = require("../utils/errorResponse.utils");
 
 
 const getAllRecentChats = async (req, res) => {
@@ -31,7 +32,30 @@ const getAllRecentChats = async (req, res) => {
     }
 }
 
+const getUserInfo = async (req, res) => {
+    try {
+
+        const {userToFind} = req.params;
+
+        const user = await UserSchema.findById(userToFind);
+
+        if(!user) return errorResponse(res,  "User not found!");
+
+        const dataToSend = {
+            username: user.username,
+            profilePic: user.profilePic,
+        }
+
+        return res.status(200).json({error: false, message: "User Found", ...dataToSend});
+
+    } catch (error) {
+        console.log(error);
+        return serverError(res);
+    }
+}
+
 
 module.exports = {
-    getAllRecentChats
+    getAllRecentChats,
+    getUserInfo,
 }
