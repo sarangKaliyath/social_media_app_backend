@@ -23,8 +23,8 @@ const sendFriendsRequest = async (req, res) => {
             
         const isRequestAlreadyReceived = user.received.length > 0 && 
             user.received?.filter((el) => el.user.toString() === userToAdd);
-            
-        if(isRequestAlreadyReceived) return errorResponse(res, "Request already received", 400, {requestReceived: true});
+        console.log({isRequestAlreadyReceived});    
+        if(isRequestAlreadyReceived.length > 0) return errorResponse(res, "Request already received", 400, {requestReceived: true});
 
         user.requested.unshift({user : friendToAddId});
         await user.save();
