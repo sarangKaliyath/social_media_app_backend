@@ -22,7 +22,6 @@ const loadMessages = async (socket, token, messagesWith) => {
 }
 
 const sendMessage = async (socket, token, messageWith, text) => {
-    console.log({token, messageWith, text})
     try {
         const userId = getUserIdFromToken(token);
 
