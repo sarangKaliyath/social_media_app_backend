@@ -69,9 +69,12 @@ const sendMessage = async (io, socket, token, messageWith, text) => {
         }
 
         const receiverSocketData = getSocketId(messageWith);
-
-        if(receiverSocketData){
-            io.to(receiverSocketData.socketId).emit("newMessageReceived", {newMessage});
+        const test = onlineUsers.get(messageWith);
+        console.log('test:', test)
+        console.log({receiverSocketData}, 'outside')
+        if(test){
+            console.log({onlineUsers}, receiverSocketData.socketId, socket.id);
+            io.to(test).emit("newMessageReceived", {newMessage});
         }
         else {
             await setMessageToUnRead(messageWith);
