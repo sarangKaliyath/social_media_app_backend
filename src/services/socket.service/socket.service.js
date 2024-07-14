@@ -14,7 +14,7 @@ const socketConnection = (io) => {
 
         socket.on("loadMessages", ({token, messagesWith}) => loadMessages(socket, token, messagesWith))
 
-        socket.on("sendMessage", ({token,messageWith,text}) => sendMessage(socket, token, messageWith, text))
+        socket.on("sendMessage", ({token,messageWith,text}) => sendMessage(io, socket, token, messageWith, text))
 
     })
 };
