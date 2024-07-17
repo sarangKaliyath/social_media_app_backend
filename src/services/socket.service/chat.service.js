@@ -1,7 +1,7 @@
 const ChatSchema = require("../../models/chat.model");
 const { getUserIdFromToken } = require("../../utils/common");
 const { setMessageToUnRead } = require("../../utils/socketHelpers.utils");
-const { onlineUsers, getSocketId } = require("./common.service");
+const { findConnectedUser, getSocketId } = require("./common.service");
 
 const loadMessages = async (socket, token, messagesWith) => {
     try {
@@ -68,13 +68,13 @@ const sendMessage = async (io, socket, token, messageWith, text) => {
             await receiverChatModel.save();
         }
 
-        const receiverSocketData = getSocketId(messageWith);
-        const test = onlineUsers.get(messageWith);
+        // const receiverSocketData = getSocketId(messageWith);
+        const test = findConnectedUser(messageWith);
         console.log('test:', test)
-        console.log({receiverSocketData}, 'outside')
+        // console.log({receiverSocketData}, 'outside')
         if(test){
-            console.log({onlineUsers}, receiverSocketData.socketId, socket.id);
-            io.to(test).emit("newMessageReceived", {newMessage});
+            console.log({test}, socket.id);
+            io.to(test.socketId).emit("newMessageReceived", {newMessage});
         }
         else {
             await setMessageToUnRead(messageWith);
